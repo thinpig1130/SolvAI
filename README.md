@@ -1,5 +1,5 @@
 # SolvAI Lab: AI Literacy in action
-![SolvAI-Lab.png](images/SolvAI-Lab.png)
+![SolvAI-Lab.png](images/000_SolvAI-Lab.png)
 ## 훈련과정 상세정보
 
 ### 훈련목표
