@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>OpenAI Text & Embedding Tester</title>
+    <style>
+        body { font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", sans-serif; margin: 18px; background:#f7fafc; color:#0f172a; }
+        h1 { font-size:20px; margin-bottom:6px; }
+        .row { display:flex; gap:12px; flex-wrap:wrap; }
+        label { font-size:13px; display:block; margin-bottom:6px; }
+        input[type=text], select, textarea { width:100%; padding:8px 10px; border:1px solid #d1d5db; border-radius:6px; background:white; }
+        textarea { min-height:120px; font-family: monospace; font-size:13px; }
+        .card { background:white; padding:12px; border-radius:10px; box-shadow: 0 1px 4px rgba(2,6,23,0.06); margin-bottom:14px; }
+        .col { flex:1 1 320px; min-width:300px; }
+        .controls { display:flex; gap:10px; align-items:center; margin-top:8px; }
+        button { background:#2563eb; color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
+        button.secondary { background:#374151; }
+        pre { background:#0b1220; color:#e6eef6; padding:12px; border-radius:8px; overflow:auto; max-height:420px; }
+        .small { font-size:12px; color:#6b7280; }
+        .inline { display:inline-flex; gap:8px; align-items:center; }
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .note { font-size:13px; color:#374151; }
+        .danger { color:#b91c1c; font-weight:600; }
+    </style>
+</head>
+<body>
+<h1>OpenAI Text & Embedding Tester</h1>
+<div class="note card">
+    <div class="small">이 도구는 테스트용입니다. 브라우저에 API 키를 입력하면 키가 클라이언트에 남아 보안 위험이 있으니, 가능하면 프록시 서버 URL을 입력해 사용하세요.</div>
+</div>
+
+<div class="card">
+    <div class="two-col">
+        <div>
+            <label>API Mode</label>
+            <select id="apiMode">
+                <option value="direct">Direct to OpenAI (https://api.openai.com)</option>
+                <option value="proxy">Use proxy / custom endpoint</option>
+            </select>
+        </div>
+        <div>
+            <label>Endpoint Base URL</label>
+            <input id="baseUrl" type="text" placeholder="예: https://api.openai.com (or) http://localhost:8000" value="https://api.openai.com" />
+        </div>
+    </div>
+
+    <div style="margin-top:10px;" class="two-col">
+        <div>
+            <label>API Key (if direct)</label>
+            <input id="apiKey" type="text" placeholder="sk-..." />
+            <div class="small">직접 OpenAI에 요청할 경우 필요. 프록시를 사용하면 프록시가 키를 대리 전달하도록 하세요.</div>
+        </div>
+        <div>
+            <label>Proxy Auth Header (optional)</label>
+            <input id="proxyAuth" type="text" placeholder="예: Bearer <token> or X-API-KEY value" />
+            <div class="small">프록시를 사용하는 경우, 프록시가 요구하는 인증 헤더 값을 입력하세요 (예: API key).</div>
+        </div>
+    </div>
+</div>
+
+<!-- Chat / Text -->
+<div class="card">
+    <h2 style="margin:0 0 10px 0;">Text / Chat Completion</h2>
+
+    <div class="row">
+        <div class="col">
+            <label>Model</label>
+            <input id="model" type="text" value="gpt-4.1-mini" />
+        </div>
+        <div style="width:160px;">
+            <label>Temperature</label>
+            <input id="temperature" type="text" value="0.2" />
+        </div>
+        <div style="width:160px;">
+            <label>Top_p</label>
+            <input id="top_p" type="text" value="1" />
+        </div>
+        <div style="width:160px;">
+            <label>Max tokens</label>
+            <input id="max_tokens" type="text" value="300" />
+        </div>
+    </div>
+
+    <div style="margin-top:10px;">
+        <label>Messages (JSON array)</label>
+        <textarea id="messages">
+[
+  {"role":"system","content":"You are a helpful assistant."},
+  {"role":"user","content":"한국어로 3문장으로 요약해줘: AI 프롬프트를 명세처럼 작성하는 방법에 대해 설명해줘."}
+]
+      </textarea>
+    </div>
+
+    <div class="controls">
+        <button id="sendText">Send Text Request</button>
+        <button id="prettyText" class="secondary">Pretty Example</button>
+        <div class="inline"><label class="small">Stop sequence</label><input id="stop" type="text" placeholder="optional (comma-separated)"></div>
+    </div>
+</div>
+
+<!-- Embeddings -->
+<div class="card">
+    <h2 style="margin:0 0 10px 0;">Embeddings</h2>
+    <div class="row">
+        <div class="col">
+            <label>Embedding Model</label>
+            <input id="embModel" type="text" value="text-embedding-3-large" />
+        </div>
+        <div style="width:200px;">
+            <label>Encoding format</label>
+            <select id="encoding_format">
+                <option value="">(default)</option>
+                <option value="base64">base64</option>
+                <option value="float">float</option>
+            </select>
+        </div>
+    </div>
+
+    <div style="margin-top:10px;">
+        <label>Input (single or JSON array)</label>
+        <textarea id="embInput">["안녕하세요", "프롬프트 엔지니어링에 대해 설명해줘"]</textarea>
+    </div>
+
+    <div class="controls">
+        <button id="sendEmb">Send Embedding Request</button>
+        <button id="clearOutput" class="secondary">Clear Output</button>
+    </div>
+</div>
+
+<!-- Output -->
+<div class="card">
+    <h2 style="margin:0 0 10px 0;">Response / Raw Output</h2>
+    <div style="display:flex; gap:8px; margin-bottom:10px;">
+        <button id="copyOutput">Copy</button>
+        <button id="downloadJson" class="secondary">Download JSON</button>
+        <div class="small" id="statusLabel">Ready</div>
+    </div>
+    <pre id="output">{ "ready": true }</pre>
+</div>
+
+<script>
+    // Helper functions
+    const $ = id => document.getElementById(id);
+    const output = $('output');
+    const setStatus = (s) => { $('statusLabel').textContent = s; };
+
+    // Build headers depending on mode
+    function buildHeaders() {
+        const mode = $('apiMode').value;
+        const headers = { 'Content-Type': 'application/json' };
+        if (mode === 'direct') {
+            const k = $('apiKey').value.trim();
+            if (!k) {
+                alert('Direct mode requires an API Key (paste into the "API Key" field).');
+                throw new Error('Missing API Key');
+            }
+            headers['Authorization'] = 'Bearer ' + k;
+        } else {
+            // proxy mode: optionally use proxyAuth as Authorization value
+            const p = $('proxyAuth').value.trim();
+            if (p) {
+                // If user supplied something that begins with "Bearer " assume full header value
+                if (p.toLowerCase().startsWith('bearer ') || p.includes(':') || p.includes(' ')) {
+                    headers['Authorization'] = p;
+                } else {
+                    // fallback: use as X-API-KEY
+                    headers['X-API-KEY'] = p;
+                }
+            }
+        }
+        return headers;
+    }
+
+    // Compose URL: for Chat completions on OpenAI v1
+    function chatUrl() {
+        const base = $('baseUrl').value.trim().replace(/\/+$/, '');
+        // Heuristic: if base contains openai.com use /v1/chat/completions, otherwise allow custom path
+        if (base.includes('api.openai.com')) return base + '/v1/chat/completions';
+        // allow custom proxy base: if user provided full path that ends with /v1/... then use directly
+        return base + (base.endsWith('/v1/chat/completions') ? '' : '/v1/chat/completions');
+    }
+
+    function embUrl() {
+        const base = $('baseUrl').value.trim().replace(/\/+$/, '');
+        if (base.includes('api.openai.com')) return base + '/v1/embeddings';
+        return base + (base.endsWith('/v1/embeddings') ? '' : '/v1/embeddings');
+    }
+
+    async function sendTextRequest() {
+        setStatus('Sending text request...');
+        try {
+            let messages = JSON.parse($('messages').value);
+            if (!Array.isArray(messages)) throw new Error('messages must be a JSON array.');
+        } catch (e) {
+            alert('Messages must be valid JSON array. Example:\n[{"role":"user","content":"Hello"}]');
+            setStatus('Invalid messages JSON');
+            return;
+        }
+
+        const model = $('model').value.trim() || 'gpt-4.1-mini';
+        const temperature = parseFloat($('temperature').value) || 0;
+        const top_p = parseFloat($('top_p').value) || 1;
+        const max_tokens = parseInt($('max_tokens').value) || 300;
+        const stopRaw = $('stop').value.trim();
+        const stop = stopRaw ? stopRaw.split(',').map(s => s.trim()).filter(Boolean) : undefined;
+
+        const payload = {
+            model,
+            messages: JSON.parse($('messages').value),
+            temperature,
+            top_p,
+            max_tokens
+        };
+        if (stop) payload.stop = stop;
+
+        const headers = buildHeaders();
+        const url = chatUrl();
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(payload)
+            });
+            const text = await res.text();
+            // try parse JSON
+            let parsed;
+            try { parsed = JSON.parse(text); } catch(e) { parsed = text; }
+            output.textContent = JSON.stringify({ url, request: payload, status: res.status, response: parsed }, null, 2);
+            setStatus('Done');
+        } catch (err) {
+            output.textContent = JSON.stringify({ error: String(err) }, null, 2);
+            setStatus('Error');
+        }
+    }
+
+    async function sendEmbRequest() {
+        setStatus('Sending embedding request...');
+        const model = $('embModel').value.trim() || 'text-embedding-3-large';
+        let inputRaw = $('embInput').value.trim();
+        let input;
+        try {
+            // if user provided JSON array, parse it; otherwise send as string
+            if ((inputRaw.startsWith('[') && inputRaw.endsWith(']')) || inputRaw.startsWith('"')) {
+                input = JSON.parse(inputRaw);
+            } else {
+                // could be multiple lines
+                if (inputRaw.includes('\n')) {
+                    input = inputRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+                } else {
+                    input = inputRaw;
+                }
+            }
+        } catch (e) {
+            alert('Input for embeddings must be valid JSON array or plain text.');
+            setStatus('Invalid emb input');
+            return;
+        }
+
+        const encoding_format = $('encoding_format').value || undefined;
+        const payload = { model, input };
+        if (encoding_format) payload.encoding_format = encoding_format;
+
+        const headers = buildHeaders();
+        const url = embUrl();
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(payload)
+            });
+            const text = await res.text();
+            let parsed;
+            try { parsed = JSON.parse(text); } catch(e) { parsed = text; }
+            output.textContent = JSON.stringify({ url, request: payload, status: res.status, response: parsed }, null, 2);
+            setStatus('Done');
+        } catch (err) {
+            output.textContent = JSON.stringify({ error: String(err) }, null, 2);
+            setStatus('Error');
+        }
+    }
+
+    // Buttons
+    $('sendText').addEventListener('click', async () => {
+        try { await sendTextRequest(); } catch(e) { console.error(e); }
+    });
+
+    $('sendEmb').addEventListener('click', async () => {
+        try { await sendEmbRequest(); } catch(e) { console.error(e); }
+    });
+
+    $('clearOutput').addEventListener('click', () => { output.textContent = ''; setStatus('Cleared'); });
+
+    $('copyOutput').addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(output.textContent);
+            setStatus('Copied to clipboard');
+        } catch(e) {
+            setStatus('Clipboard failed');
+        }
+    });
+
+    $('downloadJson').addEventListener('click', () => {
+        const blob = new Blob([output.textContent], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'openai-response.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    // Populate a pretty example when clicking "Pretty Example"
+    $('prettyText').addEventListener('click', () => {
+        $('messages').value = JSON.stringify([
+            { "role": "system", "content": "You are a concise assistant that outputs in Korean." },
+            { "role": "user", "content": "다음 문서를 200자 이내로 요약하고, 인용 문장 1개를 함께 JSON으로 출력해줘: 프롬프트는 명세다 — 텍스트로 쓰는 계약. 핵심 원칙만 간결히 정리해줘." }
+        ], null, 2);
+        setStatus('Example loaded');
+    });
+
+    // Set initial status
+    setStatus('Ready');
+</script>
+</body>
+</html>

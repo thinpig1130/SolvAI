@@ -1,5 +1,6 @@
 # SolvAI Lab: AI Literacy in action
 ![SolvAI-Lab.png](images/000_SolvAI-Lab.png)
+
 ## 훈련과정 상세정보
 
 ### 훈련목표
@@ -20,7 +21,6 @@ AI 변화에 대응하는 역량을 확보하고, 실제 직무에서 AI를 기�
 | 4  | AI 서비스 평가                         | 구체화 및 결과 확인 실험                                                           | 4     | 16 |
 | 5  | AI 서비스 구현 | 최종 아이템 선정 <br> 프로토타입 구현                                                  | 4     | 20 |
 | 6  | 과정평가                              | 2                                                                        | 2     | 22 |
-
 
 # 출석 CHECK !! 
 ![QR.png](images/QR.png)

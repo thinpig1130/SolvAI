@@ -1,0 +1,109 @@
+### 1. Health Check
+GET https://api.openai.com/v1/models
+Authorization: Bearer {{OPENAI_API_KEY}}
+Content-Type: application/json
+
+###
+
+### 2. Chat Completion (기본 텍스트 생성)
+POST https://api.openai.com/v1/chat/completions
+Authorization: Bearer {{OPENAI_API_KEY}}
+Content-Type: application/json
+
+{
+  "model": "gpt-4.1-mini",
+  "messages": [
+    { "role": "system", "content": "You are a helpful assistant." },
+    { "role": "user", "content": "Tell me a short story about a robot." }
+  ],
+  "temperature": 0.7,
+  "max_tokens": 150
+}
+
+###
+
+### 3. Chat Completion — JSON 응답 강제 테스트
+POST https://api.openai.com/v1/chat/completions
+Authorization: Bearer {{OPENAI_API_KEY}}
+Content-Type: application/json
+
+{
+  "model": "gpt-4.1",
+  "messages": [
+    { "role": "user", "content": "Give me weather info for Seoul." }
+  ],
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "weatherSchema",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "temperature": { "type": "number" },
+          "condition": { "type": "string" },
+          "humidity": { "type": "number" }
+        },
+        "required": ["temperature", "condition"]
+      }
+    }
+  }
+}
+
+###
+
+### 4. Chat Completion — 스트리밍 테스트
+POST https://api.openai.com/v1/chat/completions
+Authorization: Bearer {{OPENAI_API_KEY}}
+Accept: text/event-stream
+Content-Type: application/json
+
+{
+  "model": "gpt-4.1-mini",
+  "stream": true,
+  "messages": [
+    { "role": "user", "content": "Write a poem about the ocean." }
+  ]
+}
+
+###
+
+### 5. Embeddings 생성
+POST https://api.openai.com/v1/embeddings
+Authorization: Bearer {{OPENAI_API_KEY}}
+Content-Type: application/json
+
+{
+  "model": "text-embedding-3-large",
+  "input": "OpenAI provides powerful embedding models."
+}
+
+###
+
+### 6. Embeddings — 여러 텍스트 입력
+POST https://api.openai.com/v1/embeddings
+Authorization: Bearer {{OPENAI_API_KEY}}
+Content-Type: application/json
+
+{
+  "model": "text-embedding-3-small",
+  "input": [
+    "Hello world!",
+    "Machine learning is amazing.",
+    "Embeddings help semantic search."
+  ]
+}
+
+###
+
+### 7. Embeddings — Base64 인코딩
+POST https://api.openai.com/v1/embeddings
+Authorization: Bearer {{OPENAI_API_KEY}}
+Content-Type: application/json
+
+{
+  "model": "text-embedding-3-large",
+  "input": "Encoding output as base64",
+  "encoding_format": "base64"
+}
+
+###
