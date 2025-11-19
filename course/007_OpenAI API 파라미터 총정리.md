@@ -220,4 +220,8 @@ POST /v1/embeddings
 
 ---
 
-필요하시면 **각 요청을 Java/Spring**, **Node.js**, **Python**, **cURL** 예제로도 만들어 드릴까요?
+[ 부록 ] 
+[api-test.html](../example/api-test.html)
+[open-test.http](../example/open-test.http)
+
+
