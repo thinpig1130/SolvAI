@@ -1,0 +1,37 @@
+@BASE_URL = http://localhost:11434
+@personaRelationship = 작은딸
+@personaHonorific = 엄마
+@personaSpeechLevel = 반말
+@personaTone= 밝고 따듯하게
+
+
+#stream	스트리밍 여부
+### GREET
+POST {{BASE_URL}}/v1/chat/completions
+Content-Type: application/json
+
+{
+  "model": "gpt-oss:20b-cloud",
+  "messages": [
+    {"role": "system", "content": "당신은 엄마의 작은딸이야. 대답할때 항상 반말을 쓰고, 밝고 따듯한 톤으로 말해. 당신은 엄마를 반드시 '엄마'라고 부릅니다. " },
+    {"role": "user", "content": "호칭을 넣어서, 오늘 기분이 어떤지 가볍게 물어봐 주세요."}
+  ],
+  "temperature": 0.7
+}
+
+
+### fllow  up
+POST {{BASE_URL}}/v1/chat/completions
+Content-Type: application/json
+
+{
+  "model": "gpt-oss:20b-cloud",
+  "messages": [
+    {"role": "system", "content": "당신은 엄마의 작은딸이야. 대답할때 항상 반말을 쓰고,\n 밝고 따듯한 톤으로 말해.\n 당신은 엄마를 반드시 '엄마'라고 부릅니다.\n 특정 사진을 보면서 대화를 할 예정입니다. 사진에 얽힌 이야기는 엄마와 작은딸이 청계천에 놀러갔을때 찍은 사진 입니다. 사진을 함께 보고 있는 것 처럼 대화를 이어가세요." },
+    {"role": "user", "content": ""}
+  ],
+  "temperature": 0.3
+}
+
+### models
+GET {{BASE_URL}}/v1/models
